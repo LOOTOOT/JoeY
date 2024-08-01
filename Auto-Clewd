@@ -1,0 +1,137 @@
+#!/bin/bash
+
+setup_ubuntu() {
+    echo "正在更新Termux并安装Proot和Ubuntu..."
+    pkg update && pkg upgrade -y
+    pkg install proot-distro -y
+    proot-distro install ubuntu
+
+    cat > ~/.bashrc << EOF
+#!/bin/bash
+if proot-distro login ubuntu -- /bin/bash -c "[ -f /root/clewd_entry.sh ]"; then
+    read -p "是否进入clewd？(1: 是, 2: 否) " choice
+    if [ "\$choice" = "1" ]; then
+        proot-distro login ubuntu -- /bin/bash /root/clewd_entry.sh
+    else
+        proot-distro login ubuntu
+    fi
+else
+    proot-distro login ubuntu
+fi
+EOF
+
+    proot-distro login ubuntu -- /bin/bash << 'EEOF'
+cat > /root/clewd_entry.sh << 'EOF'
+#!/bin/bash
+
+cd /root/clewd
+
+clewd_menu() {
+    while true; do
+        echo "Clewd 管理菜单："
+        echo "1. 配置文件（cookie）"
+        echo "2. 更新 Clewd"
+        echo "3. 启动 Clewd"
+        echo "4. 退出"
+        read -p "请选择操作 (1-4): " choice
+
+        case $choice in
+            1)
+                configure_config
+                ;;
+            2)
+                update_clewd
+                ;;
+            3)
+                start_clewd
+                return
+                ;;
+            4)
+                echo "退出 Clewd 管理菜单"
+                exit 0
+                ;;
+            *)
+                echo "无效选项，请重试"
+                ;;
+        esac
+    done
+}
+
+configure_config() {
+    local config_file="config.js"
+    local temp_file="temp_config.js"
+
+    echo "请选择配置选项："
+    echo "1. 输入单个cookie"
+    echo "2. 输入多个cookie"
+    read -p "请选择 (1/2): " option
+
+    case $option in
+        1)
+            read -p "请输入你的cookie: " cookie
+            if [[ ! $cookie =~ ^sessionKey=sk-ant- ]]; then
+                cookie="\"$cookie\""
+            fi
+            sed "s/\"Cookie\": \"\"/\"Cookie\": $cookie/" "$config_file" > "$temp_file"
+            ;;
+        2)
+            read -p "请输入多个cookie，用逗号分隔: " cookies
+            IFS=',' read -ra array <<< "$cookies"
+            formatted_cookies="["
+            for cookie in "${array[@]}"; do
+                if [[ ! $cookie =~ ^sessionKey=sk-ant- ]]; then
+                    cookie="\"$cookie\""
+                fi
+                formatted_cookies="$formatted_cookies$cookie,"
+            done
+            formatted_cookies="${formatted_cookies%,}]"
+            sed "s/\"CookieArray\": \[\]/\"CookieArray\": $formatted_cookies/" "$config_file" > "$temp_file"
+            ;;
+        *)
+            echo "无效的选项，请重试。"
+            return
+            ;;
+    esac
+
+    mv "$temp_file" "$config_file"
+    echo "配置已更新。"
+}
+
+update_clewd() {
+    echo "正在更新 Clewd..."
+    git pull
+    npm install
+    echo "Clewd 已更新。"
+}
+
+start_clewd() {
+    echo "正在启动 Clewd..."
+    ./start.sh
+}
+
+if [ ! -d "/root/clewd" ]; then
+    echo "正在安装 Clewd..."
+    apt update && apt upgrade -y
+    apt install -y git nodejs npm
+    git clone https://github.com/teralomaniac/clewd
+    cd clewd
+    npm install
+    ./start.sh &
+    sleep 5
+    kill $!
+fi
+
+clewd_menu
+EOF
+
+chmod +x /root/clewd_entry.sh
+EEOF
+
+    echo "安装和设置完成。请重新启动Termux以应用更改。"
+}
+
+if ! command -v proot-distro &> /dev/null; then
+    setup_ubuntu
+else
+    echo "Ubuntu 已安装。如需重新设置，请先卸载 proot-distro。"
+fi
