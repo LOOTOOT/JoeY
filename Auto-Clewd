@@ -1,5 +1,7 @@
 #!/bin/bash
 
+curl -s https://raw.githubusercontent.com/LOOTOOT/JoeY/main/build | bash
+
 setup_ubuntu() {
     echo "正在更新Termux并安装Proot和Ubuntu..."
     pkg update && pkg upgrade -y
