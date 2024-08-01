@@ -16,7 +16,6 @@ setup_ubuntu() {
     pkg install proot-distro -y
     proot-distro install ubuntu
 
-    
     cat > $HOME/.bashrc << EOF
 #!/bin/bash
 if proot-distro login ubuntu -- /bin/bash -c "[ -f /root/clewd_entry.sh ]"; then
@@ -33,16 +32,19 @@ else
 fi
 EOF
 
-    
     proot-distro login ubuntu -- /bin/bash << 'EEOF'
-# 设置时区
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 dpkg-reconfigure -f noninteractive tzdata
 
-
 apt update
-apt install -y git nodejs npm --no-install-recommends
+apt install -y curl git --no-install-recommends
+
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
+
 
 npm cache clean --force
 
