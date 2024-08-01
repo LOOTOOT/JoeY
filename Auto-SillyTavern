@@ -1,0 +1,115 @@
+#!/bin/bash
+
+curl -s https://raw.githubusercontent.com/LOOTOOT/JoeY/main/build | bash
+
+# 设置错误时退出
+set -e
+
+# 声明信息
+echo "本脚本由道行歌/JoeY制作"
+echo "酒馆是一个使用各种AI的工具，用户需自备能使用AI的代理、API或曲奇。关于酒馆如何连接claude等问题，请添加QQ号1327170565后进群了解。"
+echo "脚本执行中..."
+
+
+cleanup() {
+    echo "执行清理操作..."
+}
+
+trap cleanup EXIT
+
+check_network() {
+    echo "检查网络连接..."
+    if ! ping -c 1 google.com > /dev/null 2>&1; then
+        echo "网络连接失败，请检查你的网络设置。梯子不行就换，信号不行就wifi,5G互换"
+        exit 1
+    fi
+}
+
+update_system() {
+    echo "正在更新系统..."
+    if ! apt update -y; then
+        echo "apt update 失败,尝试更换软件源..."
+        # 备份原始源文件
+        cp $PREFIX/etc/apt/sources.list $PREFIX/etc/apt/sources.list.bak
+        # 替换为清华大学的镜像源
+        echo "deb https://mirrors.tuna.tsinghua.edu.cn/termux/termux-packages-24 stable main" > $PREFIX/etc/apt/sources.list
+        apt update -y || {
+            echo "更新失败,正在还原原始源..."
+            mv $PREFIX/etc/apt/sources.list.bak $PREFIX/etc/apt/sources.list
+            apt update -y || {
+                echo "系统更新失败,请检查网络连接或手动更新系统。"
+                exit 1
+            }
+        }
+    fi
+    apt upgrade -y -o Dpkg::Options::="--force-confnew"
+
+    echo "清理无用软件包..."
+    apt autoclean -y
+    apt clean -y
+}
+
+install_git() {
+    if ! command -v git &> /dev/null; then
+        echo "安装Git..."
+        if ! pkg install git -y; then
+            echo "安装Git失败，请检查你的包管理器。"
+            exit 1
+        fi
+    else
+        echo "Git已安装，跳过此步骤."
+    fi
+}
+
+clone_repo() {
+    REPO_URL="https://github.com/SillyTavern/SillyTavern.git"
+    echo "克隆SillyTavern仓库: $REPO_URL"
+    if ! git clone $REPO_URL; then
+        echo "无法克隆仓库，请检查网络连接和仓库地址。清除Termux应用数据后再次运行脚本"
+        exit 1
+    fi
+}
+
+
+install_dependencies() {
+    echo "进入SillyTavern目录..."
+    cd SillyTavern || { echo "无法进入SillyTavern目录，请检查克隆是否成功。"; exit 1; }
+
+    echo "安装node.js和依赖项..."
+    if ! command -v node &> /dev/null; then
+        if ! pkg install nodejs -y; then
+            echo "安装Node.js失败，请检查你的包管理器。"
+            exit 1
+        fi
+    else
+        echo "Node.js已安装，跳过此步骤."
+    fi
+
+    if ! npm install; then
+        echo "安装依赖失败，请检查网络连接和npm配置。"
+        exit 1
+    fi
+}
+
+run_sillytavern() {
+    echo "运行SillyTavern..."
+    if ! ./start.sh && ! bash start.sh; then
+        echo "启动SillyTavern失败，请检查脚本和依赖项。"
+        exit 1
+    fi
+}
+
+
+main() {
+    check_network
+    update_system
+    install_git
+    clone_repo
+    install_dependencies
+    run_sillytavern
+
+    echo "SillyTavern已经启动！"
+    echo "请享受"
+}
+
+main
