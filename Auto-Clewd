@@ -23,6 +23,16 @@ fi
 EOF
 
     proot-distro login ubuntu -- /bin/bash << 'EEOF'
+# 设置时区
+echo "Asia/Shanghai" > /etc/timezone
+ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+dpkg-reconfigure -f noninteractive tzdata
+
+apt update
+apt install -y git nodejs npm --no-install-recommends
+
+npm cache clean --force
+
 cat > /root/clewd_entry.sh << 'EOF'
 #!/bin/bash
 
@@ -102,7 +112,7 @@ configure_config() {
 update_clewd() {
     echo "正在更新 Clewd..."
     git pull
-    npm install
+    npm install --no-install-recommends
     echo "Clewd 已更新。"
 }
 
@@ -113,11 +123,9 @@ start_clewd() {
 
 if [ ! -d "/root/clewd" ]; then
     echo "正在安装 Clewd..."
-    apt update && apt upgrade -y
-    apt install -y git nodejs npm
     git clone https://github.com/teralomaniac/clewd
     cd clewd
-    npm install
+    npm install --no-install-recommends
     ./start.sh &
     sleep 5
     kill $!
