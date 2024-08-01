@@ -1,15 +1,15 @@
 #!/bin/bash
 
-curl -s https://raw.githubusercontent.com/LOOTOOT/JoeY/main/build | bash
-
-cleanup() {
-    echo "正在清理之前的安装..."
-    proot-distro remove ubuntu
-    rm -rf $HOME/.bashrc
+remove_existing_ubuntu() {
+    if proot-distro list | grep -q "ubuntu"; then
+        echo "正在删除现有的 Ubuntu 安装..."
+        proot-distro remove ubuntu
+        rm -rf $HOME/.bashrc
+    fi
 }
 
 setup_ubuntu() {
-    cleanup
+    remove_existing_ubuntu
 
     echo "正在更新Termux并安装Proot和Ubuntu..."
     pkg update && pkg upgrade -y
@@ -23,7 +23,7 @@ if proot-distro login ubuntu -- /bin/bash -c "[ -f /root/clewd_entry.sh ]"; then
     if [ "\$choice" = "1" ]; then
         proot-distro login ubuntu -- /bin/bash /root/clewd_entry.sh
     elif [ "\$choice" = "2" ]; then
-        echo "退出 Termux"
+        echo "退出Ubuntu"
         exit
     else
         proot-distro login ubuntu
@@ -34,7 +34,7 @@ fi
 EOF
 
     proot-distro login ubuntu -- /bin/bash << 'EEOF'
-
+# 设置时区
 echo "Asia/Shanghai" > /etc/timezone
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 dpkg-reconfigure -f noninteractive tzdata
@@ -42,7 +42,6 @@ dpkg-reconfigure -f noninteractive tzdata
 
 apt update
 apt install -y git nodejs npm --no-install-recommends
-
 
 npm cache clean --force
 
@@ -134,7 +133,6 @@ start_clewd() {
     ./start.sh
 }
 
-
 if [ ! -d "/root/clewd" ]; then
     echo "正在安装 Clewd..."
     git clone https://github.com/teralomaniac/clewd
@@ -154,14 +152,4 @@ EEOF
     echo "安装和设置完成。请重新启动Termux以应用更改。"
 }
 
-
-if ! command -v proot-distro &> /dev/null; then
-    setup_ubuntu
-else
-    read -p "Ubuntu 已安装。是否要重新安装？(y/n) " choice
-    if [ "$choice" = "y" ]; then
-        setup_ubuntu
-    else
-        echo "保持当前安装不变。"
-    fi
-fi
+setup_ubuntu
