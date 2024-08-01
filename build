@@ -17,8 +17,8 @@ welcome_text() {
     echo "     \  /\  /  __/ | (_| (_) | | | | | |  __/ |_|"
     echo "      \/  \/ \___|_|\___\___/|_| |_| |_|\___| (_)"
     echo -e "${RESET}"
-    echo -e "${CYAN}欢迎使用酒馆自动安装助手${RESET}"
-    echo -e "${YELLOW}Created by JoeY${RESET}"
+    echo -e "${CYAN}欢迎使用自动安装助手${RESET}"
+    echo -e "${YELLOW}由JoeY制作发布${RESET}"
 }
 
 loading_animation() {
@@ -39,5 +39,5 @@ welcome_text
 
 loading_animation
 
-echo "开始安装..."
+echo "坐好了，要开始安装了嗷..."
 sleep 1
