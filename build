@@ -24,7 +24,7 @@ welcome_text() {
 loading_animation() {
     local delay=0.1
     local symbols=('|' '/' '-' '\')
-    for _ in {1..20}; do
+    for _ in {1..10}; do
         for symbol in "${symbols[@]}"; do
             echo -ne "\r${GREEN}Loading $symbol${RESET}"
             sleep $delay
