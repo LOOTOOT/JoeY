@@ -16,6 +16,7 @@ setup_ubuntu() {
     pkg install proot-distro -y
     proot-distro install ubuntu
 
+    
     cat > $HOME/.bashrc << EOF
 #!/bin/bash
 if proot-distro login ubuntu -- /bin/bash -c "[ -f /root/clewd_entry.sh ]"; then
@@ -23,8 +24,7 @@ if proot-distro login ubuntu -- /bin/bash -c "[ -f /root/clewd_entry.sh ]"; then
     if [ "\$choice" = "1" ]; then
         proot-distro login ubuntu -- /bin/bash /root/clewd_entry.sh
     elif [ "\$choice" = "2" ]; then
-        echo "退出Ubuntu"
-        exit
+        echo "退出 Ubuntu，返回 Termux"
     else
         proot-distro login ubuntu
     fi
@@ -33,6 +33,7 @@ else
 fi
 EOF
 
+    
     proot-distro login ubuntu -- /bin/bash << 'EEOF'
 # 设置时区
 echo "Asia/Shanghai" > /etc/timezone
@@ -83,6 +84,13 @@ clewd_menu() {
 
 configure_config() {
     local config_file="config.js"
+    if [ ! -f "$config_file" ]; then
+        echo "config.js 文件不存在，请先运行 Clewd 一次以创建配置文件。"
+        start_clewd
+        echo "配置文件已创建，请重新运行脚本以进行配置。"
+        exit 0
+    fi
+
     local temp_file="temp_config.js"
 
     echo "请选择配置选项："
@@ -138,9 +146,12 @@ if [ ! -d "/root/clewd" ]; then
     git clone https://github.com/teralomaniac/clewd
     cd clewd
     npm install --no-install-recommends
+    echo "正在首次运行 Clewd 以创建配置文件..."
     ./start.sh &
     sleep 5
     kill $!
+    echo "配置文件已创建，请重新运行脚本以进行配置。"
+    exit 0
 fi
 
 clewd_menu
