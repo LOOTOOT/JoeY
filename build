@@ -1,0 +1,43 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+RESET='\033[0m'
+
+welcome_text() {
+    echo -e "${MAGENTA}"
+    echo "  __          __  _                            _ "
+    echo "  \ \        / / | |                          | |"
+    echo "   \ \  /\  / /__| | ___ ___  _ __ ___   ___  | |"
+    echo "    \ \/  \/ / _ \ |/ __/ _ \| '_ \` _ \ / _ \ | |"
+    echo "     \  /\  /  __/ | (_| (_) | | | | | |  __/ |_|"
+    echo "      \/  \/ \___|_|\___\___/|_| |_| |_|\___| (_)"
+    echo -e "${RESET}"
+    echo -e "${CYAN}Welcome to Auto-SillyTavern Installer${RESET}"
+    echo -e "${YELLOW}Created by JoeY${RESET}"
+}
+
+loading_animation() {
+    local delay=0.1
+    local symbols=('|' '/' '-' '\')
+    for _ in {1..20}; do
+        for symbol in "${symbols[@]}"; do
+            echo -ne "\r${GREEN}Loading $symbol${RESET}"
+            sleep $delay
+        done
+    done
+    echo -e "\n"
+}
+
+clear
+
+welcome_text
+
+loading_animation
+
+echo "Starting installation..."
+sleep 1
