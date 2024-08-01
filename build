@@ -17,7 +17,7 @@ welcome_text() {
     echo "     \  /\  /  __/ | (_| (_) | | | | | |  __/ |_|"
     echo "      \/  \/ \___|_|\___\___/|_| |_| |_|\___| (_)"
     echo -e "${RESET}"
-    echo -e "${CYAN}Welcome to Auto-SillyTavern Installer${RESET}"
+    echo -e "${CYAN}欢迎使用酒馆自动安装助手${RESET}"
     echo -e "${YELLOW}Created by JoeY${RESET}"
 }
 
@@ -39,5 +39,5 @@ welcome_text
 
 loading_animation
 
-echo "Starting installation..."
+echo "开始安装..."
 sleep 1
