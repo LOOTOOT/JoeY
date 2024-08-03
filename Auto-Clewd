@@ -1,5 +1,7 @@
 #!/bin/bash
 
+curl -s https://raw.githubusercontent.com/LOOTOOT/JoeY/main/build | bash
+
 remove_existing_ubuntu() {
     if proot-distro list | grep -q "ubuntu"; then
         echo "正在删除现有的 Ubuntu 安装..."
