@@ -18,7 +18,7 @@ welcome_text() {
     echo "      \/  \/ \___|_|\___\___/|_| |_| |_|\___| (_)"
     echo -e "${RESET}"
     echo -e "${CYAN}欢迎使用自动安装助手${RESET}"
-    echo -e "${YELLOW}由JoeY制作发布${RESET}"
+    echo -e "${YELLOW}由JoeY/道行歌制作发布${RESET}"
 }
 
 loading_animation() {
